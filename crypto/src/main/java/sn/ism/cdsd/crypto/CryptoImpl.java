@@ -1,10 +1,10 @@
 package sn.ism.cdsd.crypto;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.security.Key;
+import javax.crypto.KeyGenerator;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -81,7 +81,15 @@ public class CryptoImpl implements ICrypto {
 
     @Override
     public SecretKey generateKey() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        KeyGenerator KeyG;
+        try {
+            KeyG = KeyGenerator.getInstance("AES");
+        } catch (Exception ex) {
+            Logger.getLogger(CryptoImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+        KeyG.init(256);
+        return KeyG.generateKey();
     }
 
     @Override
