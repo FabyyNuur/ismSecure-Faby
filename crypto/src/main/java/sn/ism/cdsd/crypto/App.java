@@ -19,7 +19,13 @@ public class App
         System.out.println("olde    :"+chaine);
 
         SecretKey secretKey = crypto.generateKey();
-        System.out.println(secretKey);
-        
+
+        String messageOriginal = "Bonjour, ceci est un message secret !";
+        String messageChiffre = crypto.encrypt(messageOriginal, secretKey);
+        String messageDechiffre = crypto.decrypt(messageChiffre, secretKey);
+
+        System.out.println("Message original  : " + messageOriginal);
+        System.out.println("Message chiffré   : " + messageChiffre);
+        System.out.println("Message déchiffré : " + messageDechiffre);
     }
 }

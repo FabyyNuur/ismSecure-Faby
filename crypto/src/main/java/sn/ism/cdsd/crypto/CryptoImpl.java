@@ -14,7 +14,10 @@ import java.security.PublicKey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class CryptoImpl implements ICrypto {
 
@@ -99,8 +102,23 @@ public class CryptoImpl implements ICrypto {
     }
 
     @Override
-    public SecretKey generateKey(String password) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public SecretKey generateKey(String mdp) {
+        SecretKey clepbe = null;
+        char[] password = mdp.toCharArray();
+        PBEKeySpec pbe = new PBEKeySpec(password, "M2-CDSD-S3".getBytes(),1024,256);
+
+        mdp = "";
+        for(int j=0; j< password.length; j++){
+            password[j] = 0;
+        }
+        try {
+            SecretKeyFactory kdfFactory = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES");
+            SecretKey keyPBE = kdfFactory.generateSecret(pbe);
+            clepbe = new SecretKeySpec(keyPBE.getEncoded(),"AES");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return clepbe;
     }
 
     @Override
@@ -127,7 +145,7 @@ public class CryptoImpl implements ICrypto {
     public String encrypt(String data, Key key) {
         try {
             Cipher cipher= Cipher.getInstance("AES/CBC/PKCS5Padding");
-            byte[] iv= "une chaine multiple de 16 18 yhhd".getBytes();
+            byte[] iv = "une chaine mult!".getBytes(StandardCharsets.UTF_8);
             IvParameterSpec ivspec= new IvParameterSpec(iv);
             cipher.init(Cipher.ENCRYPT_MODE, key,ivspec);
 
@@ -144,7 +162,7 @@ public class CryptoImpl implements ICrypto {
     public String decrypt(String data, Key key) {
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            byte[] iv = "une chaine multiple de 16 18 yhhd".getBytes();
+            byte[] iv = "une chaine mult!".getBytes(StandardCharsets.UTF_8);
             IvParameterSpec ivspec = new IvParameterSpec(iv);
             cipher.init(Cipher.DECRYPT_MODE, key, ivspec);
 
