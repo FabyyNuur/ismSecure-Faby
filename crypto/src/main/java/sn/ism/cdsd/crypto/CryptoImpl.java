@@ -84,8 +84,8 @@ public class CryptoImpl implements ICrypto {
     public SecretKey generateKey() {
         KeyGenerator KeyG;
         try {
-            SecureRandom random= SecureRandom.getInstance("SHA1PRNG");
-            random.setSeed("graine".getBytes());
+           // SecureRandom random= SecureRandom.getInstance("SHA1PRNG");
+            //random.setSeed("graine".getBytes());
             KeyG = KeyGenerator.getInstance("AES");
         } catch (Exception ex) {
             Logger.getLogger(CryptoImpl.class.getName()).log(Level.SEVERE, null, ex);
