@@ -9,11 +9,22 @@ import java.security.Key;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import java.security.KeyPair;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.Cipher;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -103,22 +114,32 @@ public class CryptoImpl implements ICrypto {
 
     @Override
     public SecretKey generateKey(String mdp) {
-        SecretKey clepbe = null;
+        // genrer une clé à partir d'un mot de passe seulment
+        SecretKey clepbe=null;
+        //on appelle Transforme le mot de passe en tableau de Char
+        //MessageDigest.getInstance("SHA256");
         char[] password = mdp.toCharArray();
-        PBEKeySpec pbe = new PBEKeySpec(password, "M2-CDSD-S3".getBytes(),1024,256);
+        PBEKeySpec pbe = new PBEKeySpec(password,
+                "M2-CDSD-S3".getBytes(), 1024, 256);
+        //on vide le tableau de char password
+        mdp="";
+	for (int j = 0; j < password.length; j++) {
+		password[j] = 0;
+	}
+	try {  
+         //on appelle le KDF: PBEKeySpec pour construire une clé
+          SecretKeyFactory kdfFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+          SecretKey keyPBE = kdfFactory.generateSecret(pbe);// cle generique
+          clepbe=new SecretKeySpec(keyPBE.getEncoded(), "AES");
+			
+       } catch (Exception e) {
+	     // TODO Auto-generated catch block
+	      e.printStackTrace();
+       }
+                
+       return clepbe;
 
-        mdp = "";
-        for(int j=0; j< password.length; j++){
-            password[j] = 0;
-        }
-        try {
-            SecretKeyFactory kdfFactory = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES");
-            SecretKey keyPBE = kdfFactory.generateSecret(pbe);
-            clepbe = new SecretKeySpec(keyPBE.getEncoded(),"AES");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return clepbe;
+
     }
 
     @Override
@@ -142,38 +163,37 @@ public class CryptoImpl implements ICrypto {
     }
 
     @Override
-    public String encrypt(String data, Key key) {
+    public String encrypt(String data, SecretKey key) {
         try {
-            Cipher cipher= Cipher.getInstance("AES/CBC/PKCS5Padding");
-            byte[] iv = "une chaine mult!".getBytes(StandardCharsets.UTF_8);
-            IvParameterSpec ivspec= new IvParameterSpec(iv);
-            cipher.init(Cipher.ENCRYPT_MODE, key,ivspec);
-
-            byte[] enc= cipher.doFinal(data.getBytes());
-
+            Cipher cipher=Cipher.getInstance("AES/CBC/PKCS5Padding");
+            byte[] iv="une chaine de 16".getBytes();
+            IvParameterSpec ivspec=new IvParameterSpec(iv);
+            cipher.init(Cipher.ENCRYPT_MODE, key,ivspec );
+            
+            byte[] enc=cipher.doFinal(data.getBytes());
+            
             return bytesToHexString(enc);
+            
         } catch (Exception ex) {
             Logger.getLogger(CryptoImpl.class.getName()).log(Level.SEVERE, null, ex);
             return null;
-        }
+        } 
     }
 
     @Override
-    public String decrypt(String data, Key key) {
+    public String decrypt(String data, SecretKey key) {
         try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            byte[] iv = "une chaine mult!".getBytes(StandardCharsets.UTF_8);
-            IvParameterSpec ivspec = new IvParameterSpec(iv);
-            cipher.init(Cipher.DECRYPT_MODE, key, ivspec);
-
-            byte[] encBytes = hexStringToBytes(data);
-            byte[] dec = cipher.doFinal(encBytes);
-
-            return new String(dec, StandardCharsets.UTF_8);
+            Cipher cipher=Cipher.getInstance("AES/CBC/PKCS5Padding");
+            byte[] iv="une chaine de 16".getBytes();
+            IvParameterSpec ivspec=new IvParameterSpec(iv);
+            cipher.init(Cipher.DECRYPT_MODE, key,ivspec );
+            byte[] dec=cipher.doFinal(hexStringToBytes(data));
+            return new String(dec);
+            
         } catch (Exception ex) {
             Logger.getLogger(CryptoImpl.class.getName()).log(Level.SEVERE, null, ex);
             return null;
-        }
+        } 
     }
 
     @Override
