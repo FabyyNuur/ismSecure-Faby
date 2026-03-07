@@ -1,23 +1,18 @@
 package sn.ism.cdsd.crypto;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
-
+import javax.crypto.CipherInputStream;
 import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
@@ -242,12 +237,31 @@ public class CryptoImpl implements ICrypto {
     }
     @Override
     public void encryptFile(String inputFile, String outputFile, SecretKey key) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'encryptFile'");
+        // on lit sur inputFile , on chiffre puis on ecrit sur outputFile 
+        try {
+            FileInputStream fis = new FileInputStream(inputFile);
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            Cipher cipher=Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            CipherInputStream cis = new CipherInputStream(fis, cipher);
+            
+            byte[] buffer= new byte[1024*1024];
+            int nbrByteLu = cis.read(buffer);
+            while (nbrByteLu!=-1) {
+                fos.write(buffer, 0, nbrByteLu);
+                nbrByteLu = cis.read(buffer);
+            }
+            fos.close();
+            cis.close();
+            fis.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
     @Override
     public void decryptFile(String inputFile, String outputFile, SecretKey key) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'decryptFile'");
     }
     @Override
