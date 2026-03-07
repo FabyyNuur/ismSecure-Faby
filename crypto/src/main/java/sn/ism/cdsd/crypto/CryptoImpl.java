@@ -238,36 +238,33 @@ public class CryptoImpl implements ICrypto {
    
     @Override
     public void encryptOrDecryptFile(String inputFile, String outputFile, SecretKey key, int mode) {
-        // on lit sur inputFile , on chiffre puis on ecrit sur outputFile 
-        try {
-            FileInputStream fis = new FileInputStream(inputFile);
-            FileOutputStream fos = new FileOutputStream(outputFile);
-            Cipher cipher=Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(mode, key);
-            CipherInputStream cis = new CipherInputStream(fis, cipher);
-            
-            byte[] buffer= new byte[1024*1024];
-            int nbrByteLu = cis.read(buffer);
-            while (nbrByteLu!=-1) {
-                fos.write(buffer, 0, nbrByteLu);
-                nbrByteLu = cis.read(buffer);
-            }
-            fos.close();
-            cis.close();
-            fis.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+       // on lit sur inputFile, on chiffre puis on ecrit sur outputFile
+       try {
+        FileInputStream fis=new FileInputStream(inputFile);
+        FileOutputStream fos=new FileOutputStream(outputFile);
+        Cipher cipher=Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(mode, key);
+        CipherInputStream cis=new CipherInputStream(fis, cipher);
+        byte[] buffer=new byte[1024*1024];
+        int nbrBytesLus = cis.read(buffer);// le nombre de bytes rempli dans buffer
+        while (nbrBytesLus!=-1) {
+            fos.write(buffer, 0, nbrBytesLus);
+            nbrBytesLus = cis.read(buffer);
         }
+        fos.close();
+        cis.close();
+        fis.close();
+       } catch (Exception e) {
+        e.printStackTrace();
+       }
     }
-
-
+    
     @Override
-    public void encryptOrDecryptFile(String inputFile, String outputFile, String password, int mode) {
+    public void encryptOrDecryptFile(String inputFile, String outputFile, String password,int mode) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'encryptFile'");
     }
-
+   
     @Override
     public void hybridEncrypt(String inputFile, String outputFile, PublicKey publicKey) {
         // TODO Auto-generated method stub

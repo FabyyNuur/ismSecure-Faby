@@ -107,9 +107,9 @@ public interface ICrypto {
      * @param outputFile le chemin du fichier chiffré
      * @param key la clé secrète utilisée pour le chiffrement
      */
-    public void encryptOrDecryptFile(String inputFile, String outputFile, SecretKey key,int mode);
+    public void encryptOrDecryptFile(String inputFile, String outputFile, SecretKey key, int mode);
 
-   // public void decryptFile(String inputFile, String outputFile, SecretKey key);
+    //public void decryptFile(String inputFile, String outputFile, SecretKey key);
 
     /**
      * Déchiffre un fichier avec un mot de passe qui sera converti en clé secrète par la méthode generateKey(String password)
