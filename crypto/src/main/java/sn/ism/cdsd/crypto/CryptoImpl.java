@@ -261,8 +261,9 @@ public class CryptoImpl implements ICrypto {
     
     @Override
     public void encryptOrDecryptFile(String inputFile, String outputFile, String password,int mode) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'encryptFile'");
+        SecretKey key = generateKey(password);
+        encryptOrDecryptFile(inputFile, outputFile, key, mode);
+
     }
    
     @Override
