@@ -5,26 +5,14 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import java.security.KeyPair;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
-
 import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -114,52 +102,49 @@ public class CryptoImpl implements ICrypto {
 
     @Override
     public SecretKey generateKey(String mdp) {
-        // genrer une clé à partir d'un mot de passe seulment
-        SecretKey clepbe=null;
-        //on appelle Transforme le mot de passe en tableau de Char
-        //MessageDigest.getInstance("SHA256");
-        char[] password = mdp.toCharArray();
-        PBEKeySpec pbe = new PBEKeySpec(password,
-                "M2-CDSD-S3".getBytes(), 1024, 256);
-        //on vide le tableau de char password
-        mdp="";
-	for (int j = 0; j < password.length; j++) {
-		password[j] = 0;
-	}
-	try {  
-         //on appelle le KDF: PBEKeySpec pour construire une clé
-          SecretKeyFactory kdfFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-          SecretKey keyPBE = kdfFactory.generateSecret(pbe);// cle generique
-          clepbe=new SecretKeySpec(keyPBE.getEncoded(), "AES");
-			
-       } catch (Exception e) {
-	     // TODO Auto-generated catch block
-	      e.printStackTrace();
-       }
-                
-       return clepbe;
+        return generateKey(mdp, "M2-CDSD-S3");
 
 
     }
 
     @Override
     public SecretKey generateKey(String password, String salt) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return generateKey(password, salt, "AES");
     }
 
     @Override
     public SecretKey generateKey(String password, String salt, String algorithm) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return generateKey(password, salt, algorithm, 1024);
     }
 
     @Override
     public SecretKey generateKey(String password, String salt, String algorithm, int iterationCount) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return generateKey(password, salt, algorithm, iterationCount, 256);
     }
 
     @Override
     public SecretKey generateKey(String password, String salt, String algorithm, int iterationCount, int keyLength) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        SecretKey clepbe = null;
+        char[] passwordChars = password.toCharArray();
+        PBEKeySpec pbe = new PBEKeySpec(
+                passwordChars,
+                salt.getBytes(StandardCharsets.UTF_8),
+                iterationCount,
+                keyLength
+        );
+        // Efface le mot de passe en mémoire dès que possible.
+        password = "";
+        for (int j = 0; j < passwordChars.length; j++) {
+            passwordChars[j] = 0;
+        }
+        try {
+            SecretKeyFactory kdfFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            SecretKey keyPBE = kdfFactory.generateSecret(pbe);
+            clepbe = new SecretKeySpec(keyPBE.getEncoded(), algorithm);
+        } catch (Exception e) {
+            Logger.getLogger(CryptoImpl.class.getName()).log(Level.SEVERE, null, e);
+        }
+        return clepbe;
     }
 
     @Override
